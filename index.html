@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tạo Barcode</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .input-area,
+      .barcode-display {
+        border: 2px solid black;
+        border-radius: 10px;
+        padding: 10px;
+        width: 400px;
+        height: 400px;
+        box-sizing: border-box;
+        position: relative;
+      }
+      textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        resize: none;
+        font-size: 16px;
+        padding: 10px;
+        box-sizing: border-box;
+        outline: none;
+      }
+      .barcode-display {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      svg {
+        width: 80%;
+        height: auto;
+      }
+      .barcode-text {
+        margin-top: 10px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .arrows {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 0 20px;
+      }
+      .arrow {
+        padding-left: 30px;
+        padding-right: 30px;
+        font-size: 40px;
+        cursor: pointer;
+        user-select: none;
+      }
+      footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="title">Số lượng barcode</h1>
+    <div class="container">
+      <div class="input-area">
+        <textarea
+          id="barcodeInput"
+          placeholder="Nhập barcode cách nhau bằng dấu ,"
+        ></textarea>
+      </div>
+      <div class="barcode-display">
+        <svg id="barcode"></svg>
+        <div class="barcode-text" id="barcodeText">Thông tin barcode</div>
+        <div class="arrows">
+          <div class="arrow" onclick="prevBarcode()">&#x276E;</div>
+          <div class="arrow" onclick="nextBarcode()">&#x276F;</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let barcodes = [];
+      let currentIndex = 0;
+
+      const input = document.getElementById("barcodeInput");
+      const barcodeEl = document.getElementById("barcode");
+      const barcodeText = document.getElementById("barcodeText");
+
+      input.addEventListener("input", () => {
+        barcodes = input.value
+          .split(",")
+          .map((x) => x.trim())
+          .filter((x) => x !== "");
+        currentIndex = 0;
+        showBarcode();
+      });
+
+      function showBarcode() {
+        const title = document.getElementById("title");
+        if (barcodes.length === 0) {
+          JsBarcode(barcodeEl, "", { displayValue: false });
+          barcodeText.textContent = "Thông tin barcode";
+          title.textContent = "Số lượng barcode";
+          return;
+        }
+        const data = barcodes[currentIndex];
+        JsBarcode(barcodeEl, data, {
+          format: "CODE128",
+          displayValue: false,
+          height: 100,
+          width: 2,
+        });
+        barcodeText.textContent = data;
+        title.textContent = `Số lượng barcode (${currentIndex + 1}/${
+          barcodes.length
+        })`;
+      }
+
+      function prevBarcode() {
+        if (barcodes.length === 0) return;
+        currentIndex = (currentIndex - 1 + barcodes.length) % barcodes.length;
+        showBarcode();
+      }
+
+      function nextBarcode() {
+        if (barcodes.length === 0) return;
+        currentIndex = (currentIndex + 1) % barcodes.length;
+        showBarcode();
+      }
+
+      // Khởi tạo mặc định
+      showBarcode();
+    </script>
+  </body>
+  <footer>© 2025 Dinh Dau Moi</footer>
+</html>
