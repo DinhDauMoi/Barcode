@@ -87,7 +87,7 @@
       <div class="input-area">
         <textarea
           id="barcodeInput"
-          placeholder="Nhập barcode cách nhau bằng dấu ,"
+          placeholder=""
         ></textarea>
       </div>
       <div class="barcode-display">
@@ -109,8 +109,9 @@
       const barcodeText = document.getElementById("barcodeText");
 
       input.addEventListener("input", () => {
+        // Tách theo dòng
         barcodes = input.value
-          .split(",")
+          .split(/\r?\n/) // Hỗ trợ cả Windows (\r\n) và Unix (\n)
           .map((x) => x.trim())
           .filter((x) => x !== "");
         currentIndex = 0;
@@ -150,8 +151,10 @@
         showBarcode();
       }
 
-      // Khởi tạo mặc định
-      showBarcode();
+      // Tự động hiển thị barcode đầu tiên nếu đã có dữ liệu sẵn
+      window.addEventListener("DOMContentLoaded", () => {
+        input.dispatchEvent(new Event("input"));
+      });
     </script>
   </body>
   <footer>© 2025 Dinh Dau Moi</footer>
