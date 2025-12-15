@@ -2,9 +2,10 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>CODE128</title>
+    <title>Barcode / QR</title>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <link rel="icon" href="icon.png" type="image/png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="icon" href="icon.png" type="image/png" />
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -23,7 +24,7 @@
         margin-top: 20px;
       }
       .input-area,
-      .barcode-display {
+      .code-display {
         border: 2px solid black;
         border-radius: 10px;
         padding: 10px;
@@ -42,7 +43,7 @@
         box-sizing: border-box;
         outline: none;
       }
-      .barcode-display {
+      .code-display {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -51,6 +52,11 @@
       svg {
         width: 80%;
         height: auto;
+      }
+      #qrContainer {
+        display: none;
+        width: 260px;
+        height: 260px;
       }
       .barcode-text {
         margin-top: 10px;
@@ -83,17 +89,24 @@
     </style>
   </head>
   <body>
-    <h1 id="title">Số lượng barcode</h1>
+    <h1 id="title">
+      So luong ma
+      <label style="font-size:16px; font-weight:normal; margin-left:10px;">
+        <input type="checkbox" id="modeToggle" />
+        QR code
+      </label>
+    </h1>
     <div class="container">
       <div class="input-area">
         <textarea
           id="barcodeInput"
-          placeholder="Nhập Barcode - mỗi dòng 1 barcode"
+          placeholder="Nhap ma - moi dong 1 ma"
         ></textarea>
       </div>
-      <div class="barcode-display">
+      <div class="code-display">
         <svg id="barcode"></svg>
-        <div class="barcode-text" id="barcodeText">Thông tin barcode</div>
+        <div id="qrContainer"></div>
+        <div class="barcode-text" id="barcodeText">Thong tin ma</div>
         <div class="arrows">
           <div class="arrow" onclick="prevBarcode()">&#x276E;</div>
           <div class="arrow" onclick="nextBarcode()">&#x276F;</div>
@@ -107,35 +120,60 @@
 
       const input = document.getElementById("barcodeInput");
       const barcodeEl = document.getElementById("barcode");
+      const qrContainer = document.getElementById("qrContainer");
       const barcodeText = document.getElementById("barcodeText");
+      const title = document.getElementById("title");
+      const toggle = document.getElementById("modeToggle");
+
+      const qrCode = new QRCode(qrContainer, {
+        text: "",
+        width: 260,
+        height: 260,
+        correctLevel: QRCode.CorrectLevel.M,
+      });
 
       input.addEventListener("input", () => {
-        // Tách theo dòng
         barcodes = input.value
-          .split(/\r?\n/) // Hỗ trợ cả Windows (\r\n) và Unix (\n)
+          .split(/\r?\n/)
           .map((x) => x.trim())
           .filter((x) => x !== "");
         currentIndex = 0;
-        showBarcode();
+        showCode();
       });
 
-      function showBarcode() {
-        const title = document.getElementById("title");
+      toggle.addEventListener("change", () => {
+        showCode();
+      });
+
+      function showCode() {
+        const useQR = toggle.checked;
         if (barcodes.length === 0) {
           JsBarcode(barcodeEl, "", { displayValue: false });
-          barcodeText.textContent = "Thông tin barcode";
-          title.textContent = "Số lượng barcode";
+          qrCode.clear();
+          barcodeEl.style.display = useQR ? "none" : "block";
+          qrContainer.style.display = useQR ? "block" : "none";
+          barcodeText.textContent = "Thong tin ma";
+          title.childNodes[0].textContent = "So luong ma";
           return;
         }
         const data = barcodes[currentIndex];
-        JsBarcode(barcodeEl, data, {
-          format: "CODE128",
-          displayValue: false,
-          height: 100,
-          width: 2,
-        });
+        if (useQR) {
+          qrCode.clear();
+          qrCode.makeCode(data);
+          qrContainer.style.display = "block";
+          barcodeEl.style.display = "none";
+        } else {
+          JsBarcode(barcodeEl, data, {
+            format: "CODE128",
+            displayValue: false,
+            height: 100,
+            width: 2,
+          });
+          barcodeEl.style.display = "block";
+          qrContainer.style.display = "none";
+        }
         barcodeText.textContent = data;
-        title.textContent = `Số lượng barcode (${currentIndex + 1}/${
+        title.childNodes[0].textContent = `So luong ma (${currentIndex + 1}/${
           barcodes.length
         })`;
       }
@@ -143,20 +181,19 @@
       function prevBarcode() {
         if (barcodes.length === 0) return;
         currentIndex = (currentIndex - 1 + barcodes.length) % barcodes.length;
-        showBarcode();
+        showCode();
       }
 
       function nextBarcode() {
         if (barcodes.length === 0) return;
         currentIndex = (currentIndex + 1) % barcodes.length;
-        showBarcode();
+        showCode();
       }
 
-      // Tự động hiển thị barcode đầu tiên nếu đã có dữ liệu sẵn
       window.addEventListener("DOMContentLoaded", () => {
         input.dispatchEvent(new Event("input"));
       });
     </script>
   </body>
-  <footer>© 2025 Dinh Dau Moi</footer>
+  <footer>Ac 2025 Dinh Dau Moi</footer>
 </html>
